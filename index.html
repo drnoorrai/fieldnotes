@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rai Reading Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f8f5f0;
+    --paper-dark: #eee9e0;
+    --accent: #c45d3e;
+    --accent-light: #e8a990;
+    --muted: #8a8078;
+    --rule: #d4cdc4;
+    --sidebar-bg: #f0ebe4;
+    --tag-bg: #e6dfd6;
+    --max-w: 720px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SITE HEADER ── */
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .site-header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .site-header h1 span { color: var(--accent); }
+  .site-header nav { display: flex; gap: 1.5rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .site-header nav a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .site-header nav a:hover { color: var(--ink); }
+
+  /* ── INDEX VIEW ── */
+  .index-view {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  .index-intro {
+    max-width: 540px;
+    margin-bottom: 3rem;
+  }
+  .index-intro p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  .article-card {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 1.8rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .article-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .card-meta {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.35rem;
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+    font-weight: 400;
+  }
+  .card-excerpt {
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .card-tags {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.7rem;
+    background: var(--tag-bg);
+    color: var(--muted);
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  /* ── ARTICLE VIEW ── */
+  .article-view { display: none; }
+  .article-view.active { display: block; }
+  .index-view.hidden { display: none; }
+
+  .article-hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 2rem;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent); }
+  .back-link svg { width: 14px; height: 14px; }
+
+  .article-hero .meta-line {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+  .article-hero h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    max-width: 700px;
+  }
+  .article-hero .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    margin-top: 1rem;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+
+  .article-body-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: var(--max-w) 1fr;
+    gap: 3rem;
+  }
+
+  /* ── PROSE ── */
+  .prose h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.65rem;
+    font-weight: 400;
+    margin: 2.5rem 0 0.8rem;
+    letter-spacing: -0.01em;
+    position: relative;
+    padding-left: 1rem;
+  }
+  .prose h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    bottom: 0.2em;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .prose h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 2rem 0 0.6rem;
+    color: var(--muted);
+  }
+  .prose p {
+    margin-bottom: 1.1rem;
+    font-size: 1rem;
+  }
+  .prose ul, .prose ol {
+    margin: 0.8rem 0 1.2rem 1.4rem;
+  }
+  .prose li {
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+  .prose strong { font-weight: 500; }
+  .prose em { font-style: italic; }
+  .prose code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    background: var(--paper-dark);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+  }
+  .prose blockquote {
+    border-left: 3px solid var(--accent-light);
+    padding: 0.8rem 1.2rem;
+    margin: 1.5rem 0;
+    background: rgba(196,93,62,0.04);
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    color: var(--muted);
+  }
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.88rem;
+  }
+  .prose th {
+    text-align: left;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--rule);
+    padding: 0.6rem 0.8rem;
+  }
+  .prose td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  .prose .callout {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    margin: 1.5rem 0;
+  }
+  .prose .callout-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+  }
+  .sidebar-section {
+    margin-bottom: 2rem;
+  }
+  .sidebar-section h4 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .toc-list { list-style: none; }
+  .toc-list li {
+    margin-bottom: 0.5rem;
+  }
+  .toc-list a {
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    line-height: 1.4;
+    display: block;
+  }
+  .toc-list a:hover { color: var(--accent); }
+
+  .reading-progress {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    border-top: 1px solid var(--rule);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 860px) {
+    .article-body-wrap {
+      grid-template-columns: 1fr;
+    }
+    .sidebar { display: none; }
+    .site-header { padding: 1.2rem 1.2rem; }
+    .index-view, .article-hero, .article-body-wrap { padding-left: 1.2rem; padding-right: 1.2rem; }
+  }
+
+  /* ── READING PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    z-index: 100;
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  /* ── FADE IN ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    animation: fadeUp 0.5s ease forwards;
+    opacity: 0;
+  }
+  .fade-in:nth-child(2) { animation-delay: 0.08s; }
+  .fade-in:nth-child(3) { animation-delay: 0.16s; }
+  .fade-in:nth-child(4) { animation-delay: 0.24s; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ═══════ HEADER ═══════ -->
+<header class="site-header">
+  <h1><span>Rai</span> Reading Journal</h1>
+  <nav>
+    <a href="#" onclick="showIndex()">Archive</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
+<!-- ═══════ INDEX / ARCHIVE ═══════ -->
+<main class="index-view" id="indexView">
+  <div class="index-intro fade-in">
+    <p>A curated collection of articles, frameworks, and thinking worth revisiting. Saved here so the signal doesn't get lost in the noise.</p>
+  </div>
+  <div class="article-grid" id="articleGrid">
+    <!-- Cards are rendered by JS from the ARTICLES array below -->
+  </div>
+</main>
+
+<!-- ═══════ ARTICLE VIEW ═══════ -->
+<section class="article-view" id="articleView">
+  <div class="article-hero">
+    <a class="back-link" onclick="showIndex()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Archive
+    </a>
+    <div class="meta-line" id="articleMeta"></div>
+    <h2 id="articleTitle"></h2>
+    <p class="subtitle" id="articleSubtitle"></p>
+  </div>
+  <div class="article-body-wrap">
+    <article class="prose" id="articleBody"></article>
+    <aside class="sidebar" id="articleSidebar"></aside>
+  </div>
+</section>
+
+<footer class="site-footer">
+  Rai Reading Journal · Built for focused reading
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  ARTICLES — Add new articles to this array.
+//  Each article is a JS object. The `body` field accepts HTML.
+//  Copy-paste your article content into `body` and it renders
+//  beautifully with no extra work.
+// ═══════════════════════════════════════════════════════════
+
+const ARTICLES = [
+  {
+    id: "hybrid-agent-fleet",
+    date: "May 2025",
+    category: "Strategy",
+    title: "The 90-Day Hybrid AI Agent Fleet for a Clinician-Entrepreneur",
+    subtitle: "A phased roadmap for deploying AI agents across clinical, creative, and business operations.",
+    tags: ["AI", "Operations", "Agentic"],
+    excerpt: "A comprehensive framework for building a 7-agent fleet that handles content, clinical support, business ops, and personal infrastructure — without burning out the human at the centre.",
+    body: `
+      <h2>The Operating Philosophy</h2>
+      <p>The core insight is simple but counterintuitive: <strong>the clinician-entrepreneur should be the orchestrator, not the executor.</strong> Every repeatable task — from content scheduling to inbox triage to clinical note formatting — should be delegated to a specialised agent within 90 days.</p>
+
+      <p>This isn't about replacing human judgment. It's about freeing it. The highest-value activities (clinical decision-making, creative direction, strategic thinking, relationship-building) should get more of your time, not less. Agents handle the scaffolding.</p>
+
+      <div class="callout">
+        <div class="callout-label">Key Principle</div>
+        <p>Design for orchestration, not execution. You are the conductor — the agents are the orchestra.</p>
+      </div>
+
+      <h2>The 7-Agent Fleet</h2>
+      <p>Each agent operates in a defined domain with clear inputs, outputs, and escalation triggers. The fleet architecture is deliberately modular — agents can be upgraded, swapped, or retired independently.</p>
+
+      <table>
+        <thead>
+          <tr><th>Agent</th><th>Domain</th><th>Core Loop</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Atlas</strong></td><td>Content &amp; Distribution</td><td>Draft → Review → Schedule → Analyse</td></tr>
+          <tr><td><strong>Helix</strong></td><td>Clinical Support</td><td>Notes → Summary → Template → Archive</td></tr>
+          <tr><td><strong>Nexus</strong></td><td>Business Ops</td><td>Inbox → Triage → Route → Track</td></tr>
+          <tr><td><strong>Prism</strong></td><td>Research &amp; Learning</td><td>Scan → Filter → Brief → Store</td></tr>
+          <tr><td><strong>Forge</strong></td><td>Dev &amp; Infrastructure</td><td>Build → Test → Deploy → Monitor</td></tr>
+          <tr><td><strong>Echo</strong></td><td>Personal OS</td><td>Capture → Organise → Surface → Review</td></tr>
+          <tr><td><strong>Groot</strong></td><td>Communications</td><td>Receive → Classify → Draft → Send</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Phase 1 — Foundation (Days 1–30)</h2>
+      <h3>Infrastructure Sprint</h3>
+      <p>The first month is about laying pipe. No agent can function without reliable infrastructure underneath it. This means:</p>
+      <ul>
+        <li>Domain and DNS consolidation (Cloudflare-native)</li>
+        <li>Knowledge base architecture in Obsidian</li>
+        <li>API key management and secrets rotation</li>
+        <li>Core automation scaffolding (n8n or Make)</li>
+        <li>Monitoring and logging baseline</li>
+      </ul>
+
+      <p>The temptation in Phase 1 is to start building agents immediately. Resist it. An agent built on shaky infrastructure will cost you more time debugging than it saves. Get the plumbing right first.</p>
+
+      <blockquote>You can't automate chaos. First, create order. Then, automate the order.</blockquote>
+
+      <h2>Phase 2 — Activation (Days 31–60)</h2>
+      <h3>First Agents Online</h3>
+      <p>With infrastructure solid, activate the highest-ROI agents first. For most clinician-entrepreneurs, that's <strong>Atlas</strong> (content) and <strong>Nexus</strong> (ops), because these two domains consume the most discretionary time.</p>
+
+      <p>Each agent starts in "co-pilot" mode: it drafts, you approve. Nothing goes out without human review during this phase. The goal is to build trust in the agent's outputs while tuning its parameters.</p>
+
+      <div class="callout">
+        <div class="callout-label">Activation Checklist</div>
+        <p>For each agent: define inputs → set output format → establish review cadence → create escalation rules → document failure modes.</p>
+      </div>
+
+      <h2>Phase 3 — Autonomy (Days 61–90)</h2>
+      <h3>Graduated Trust</h3>
+      <p>The final phase is about moving select agents from co-pilot to auto-pilot — but only for well-defined, low-risk tasks. Content scheduling on pre-approved posts? Auto-pilot. Clinical note templates? Co-pilot forever, by design.</p>
+
+      <p>The autonomy boundary is determined by two factors:</p>
+      <ol>
+        <li><strong>Reversibility</strong> — Can you undo the action easily? If yes, more autonomy is safe.</li>
+        <li><strong>Consequence magnitude</strong> — What's the worst-case failure? If low, more autonomy is safe.</li>
+      </ol>
+
+      <p>By Day 90, the fleet should be saving 15–20 hours per week of execution time, freeing the clinician-entrepreneur to focus on the irreplaceable: patient care, creative vision, and strategic relationships.</p>
+
+      <h2>What Comes After Day 90</h2>
+      <p>The fleet is not a destination — it's a living system. Post-90-day priorities include inter-agent communication (letting Prism feed insights to Atlas automatically), performance dashboards, and the gradual introduction of web3 primitives for provenance and token-gated content.</p>
+
+      <p>The operating model scales. The human doesn't have to.</p>
+    `,
+    toc: [
+      { label: "The Operating Philosophy", anchor: "the-operating-philosophy" },
+      { label: "The 7-Agent Fleet", anchor: "the-7-agent-fleet" },
+      { label: "Phase 1 — Foundation", anchor: "phase-1" },
+      { label: "Phase 2 — Activation", anchor: "phase-2" },
+      { label: "Phase 3 — Autonomy", anchor: "phase-3" },
+      { label: "After Day 90", anchor: "after-day-90" },
+    ]
+  },
+
+  // ─── ADD MORE ARTICLES HERE ───
+  // {
+  //   id: "unique-slug",
+  //   date: "Month Year",
+  //   category: "Category",
+  //   title: "Article Title",
+  //   subtitle: "One-line description.",
+  //   tags: ["Tag1", "Tag2"],
+  //   excerpt: "Card preview text...",
+  //   body: `<h2>Section</h2><p>Content...</p>`,
+  //   toc: [
+  //     { label: "Section Name", anchor: "section-slug" }
+  //   ]
+  // },
+];
+
+
+// ═══════ RENDERING ═══════
+
+function renderIndex() {
+  const grid = document.getElementById('articleGrid');
+  grid.innerHTML = ARTICLES.map((a, i) => `
+    <div class="article-card fade-in" onclick="showArticle('${a.id}')" style="animation-delay:${i * 0.06}s">
+      <div class="card-meta">${a.category} · ${a.date}</div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.excerpt}</div>
+      <div class="card-tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function showArticle(id) {
+  const a = ARTICLES.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('indexView').classList.add('hidden');
+  const view = document.getElementById('articleView');
+  view.classList.add('active');
+  document.getElementById('articleMeta').textContent = `${a.category} · ${a.date}`;
+  document.getElementById('articleTitle').textContent = a.title;
+  document.getElementById('articleSubtitle').textContent = a.subtitle;
+  document.getElementById('articleBody').innerHTML = a.body;
+
+  // Sidebar
+  let sidebarHTML = '';
+  if (a.toc && a.toc.length) {
+    sidebarHTML += `<div class="sidebar-section"><h4>Contents</h4><ul class="toc-list">`;
+    sidebarHTML += a.toc.map(t => `<li><a href="#">${t.label}</a></li>`).join('');
+    sidebarHTML += `</ul></div>`;
+  }
+  sidebarHTML += `<div class="sidebar-section"><h4>Tags</h4><div class="card-tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div></div>`;
+  sidebarHTML += `<div class="sidebar-section reading-progress" id="readingTime"></div>`;
+  document.getElementById('articleSidebar').innerHTML = sidebarHTML;
+
+  // Reading time estimate
+  const wordCount = a.body.replace(/<[^>]+>/g, '').split(/\s+/).length;
+  const mins = Math.ceil(wordCount / 220);
+  document.getElementById('readingTime').textContent = `${mins} min read · ${wordCount} words`;
+
+  window.scrollTo(0, 0);
+}
+
+function showIndex() {
+  document.getElementById('indexView').classList.remove('hidden');
+  document.getElementById('articleView').classList.remove('active');
+  document.getElementById('progressBar').style.width = '0%';
+  window.scrollTo(0, 0);
+}
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  if (!document.getElementById('articleView').classList.contains('active')) return;
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// Init
+renderIndex();
+</script>
+</body>
+</html>
