@@ -13,6 +13,24 @@ def get_db():
     return conn
 
 
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS notes (
+            id SERIAL PRIMARY KEY,
+            article_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            highlight BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS notes_article_id_idx ON notes(article_id);
+    """)
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
 @app.route("/api/notes/<article_id>", methods=["GET"])
 def get_notes(article_id):
     try:
@@ -113,4 +131,5 @@ def serve_static(path):
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=5000, debug=False)

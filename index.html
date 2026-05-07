@@ -350,8 +350,8 @@ async function loadNotesForArticle(id){
     const r=await fetch('/api/notes/'+encodeURIComponent(id));
     if(r.ok){notesCache=await r.json();return}
   }catch{}
-  // fallback: load from localStorage, assign temporary string ids
-  notesCache=getLSNotes(id).map((n,i)=>({id:'ls_'+i,text:n.text,highlight:!!n.highlight,time:n.time}));
+  // fallback: load from localStorage, use time as unique id
+  notesCache=getLSNotes(id).map(n=>({id:'ls_'+n.time,text:n.text,highlight:!!n.highlight,time:n.time}));
 }
 
 async function migrateLocalNotes(id){
@@ -430,6 +430,7 @@ async function showArticle(id){
   document.getElementById('notesPanel').classList.remove('open');
   await migrateLocalNotes(id);
   await loadNotesForArticle(id);
+  notesCounts[id]=notesCache.length;
   updateNotesLabel();renderNotes();window.scrollTo(0,0);
 }
 
@@ -466,7 +467,8 @@ async function addNote(text){
   }catch{}
   if(!saved){
     // fallback: save to localStorage
-    const note={id:'ls_'+Date.now(),text:t,highlight:!!text,time:new Date().toISOString()};
+    const timeStr=new Date().toISOString();
+    const note={id:'ls_'+timeStr,text:t,highlight:!!text,time:timeStr};
     notesCache.unshift(note);
     const ls=getLSNotes(currentId);ls.unshift({text:t,highlight:!!text,time:note.time});
     setLSNotes(ls,currentId);
@@ -477,14 +479,16 @@ async function addNote(text){
 async function deleteNote(noteId){
   const strId=String(noteId);
   const isLocal=strId.startsWith('ls_');
-  if(!isLocal){
+  if(isLocal){
+    // remove the specific local note from localStorage by matching its time
+    const noteTime=strId.slice(3);
+    setLSNotes(getLSNotes(currentId).filter(n=>n.time!==noteTime),currentId);
+  }else{
     try{
       await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
     }catch{}
   }
   notesCache=notesCache.filter(n=>String(n.id)!==strId);
-  // keep localStorage shadow in sync with remaining notes for offline resilience
-  setLSNotes(notesCache.map(n=>({text:n.text,highlight:n.highlight,time:n.time})),currentId);
   notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
   renderNotes();updateNotesLabel();
 }
