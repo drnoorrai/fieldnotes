@@ -462,15 +462,43 @@ window.addEventListener('scroll',()=>{
   document.getElementById('progressBar').style.width=(h>0?(scrollY/h)*100:0)+'%';
 });
 
+// NOTES AUTH
+function authHeaders(){return{'Content-Type':'application/json','Authorization':'Bearer '+authorPassword}}
+async function toggleAuthorMode(){
+  if(isAuthor){lockNotes();return;}
+  const pw=prompt('Enter your password to write notes:');
+  if(!pw)return;
+  try{
+    const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    if(r.ok){authorPassword=pw;isAuthor=true;setAuthorUI(true);}
+    else{alert('Wrong password.');}
+  }catch{alert('Could not reach server.');}
+}
+function lockNotes(){isAuthor=false;authorPassword='';setAuthorUI(false);}
+function setAuthorUI(unlocked){
+  document.getElementById('authorWriteArea').style.display=unlocked?'':'none';
+  const icon=document.getElementById('lockIcon');
+  const label=document.getElementById('lockLabel');
+  if(unlocked){
+    icon.innerHTML='<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/>';
+    label.textContent='Lock';
+  }else{
+    icon.innerHTML='<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>';
+    label.textContent='Unlock';
+  }
+  renderNotes();
+}
+
 // NOTES
 function toggleNotes(){document.getElementById('notesPanel').classList.toggle('open')}
 function updateNotesLabel(){const n=notesCache.length;document.getElementById('notesLabel').textContent=n?`Notes (${n})`:'Notes'}
 async function addNote(text){
+  if(!isAuthor)return;
   const input=document.getElementById('noteInput');const t=text||input.value.trim();if(!t)return;
   let saved=false;
   try{
     const r=await fetch('/api/notes/'+encodeURIComponent(currentId),{
-      method:'POST',headers:{'Content-Type':'application/json'},
+      method:'POST',headers:authHeaders(),
       body:JSON.stringify({text:t,highlight:!!text})
     });
     if(r.ok){
@@ -478,42 +506,34 @@ async function addNote(text){
       notesCache.unshift(note);
       notesCounts[currentId]=(notesCounts[currentId]||0)+1;
       saved=true;
-    }
+    }else if(r.status===401){alert('Session expired. Please unlock again.');lockNotes();}
   }catch{}
-  if(!saved){
-    // fallback: save to localStorage
-    const timeStr=new Date().toISOString();
-    const note={id:'ls_'+timeStr,text:t,highlight:!!text,time:timeStr};
-    notesCache.unshift(note);
-    const ls=getLSNotes(currentId);ls.unshift({text:t,highlight:!!text,time:note.time});
-    setLSNotes(ls,currentId);
-    notesCounts[currentId]=(notesCounts[currentId]||0)+1;
-  }
+  if(!saved)return;
   if(!text)input.value='';renderNotes();updateNotesLabel();flashSave();
 }
 async function deleteNote(noteId){
+  if(!isAuthor)return;
   const strId=String(noteId);
-  const isLocal=strId.startsWith('ls_');
-  if(isLocal){
-    // remove the specific local note from localStorage by matching its time
-    const noteTime=strId.slice(3);
-    setLSNotes(getLSNotes(currentId).filter(n=>n.time!==noteTime),currentId);
-  }else{
-    let deleted=false;
-    try{
-      const r=await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
-      deleted=(r.ok||r.status===404);
-    }catch{}
-    if(!deleted)return;
-  }
+  let deleted=false;
+  try{
+    const r=await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE',headers:authHeaders()});
+    deleted=(r.ok||r.status===404);
+    if(r.status===401){alert('Session expired. Please unlock again.');lockNotes();return;}
+  }catch{}
+  if(!deleted)return;
   notesCache=notesCache.filter(n=>String(n.id)!==strId);
   notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
   renderNotes();updateNotesLabel();
 }
 function renderNotes(){
+  const canWrite=isAuthor;
   document.getElementById('notesList').innerHTML=notesCache.map((n)=>{
     const ts=new Date(n.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote('${n.id}')">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
+    return`<div class="note-item${n.highlight?' hl':''}">
+      ${canWrite?`<button class="note-del" onclick="deleteNote('${n.id}')">&times;</button>`:''}
+      ${n.highlight?'<div class="hl-label">Highlight</div>':''}
+      <p>${esc(n.text)}</p><div class="note-time">${ts}</div>
+    </div>`
   }).join('');
 }
 function flashSave(){const el=document.getElementById('savedFlash');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
