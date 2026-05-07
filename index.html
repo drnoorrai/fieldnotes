@@ -327,6 +327,8 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);line-height:
 <script>
 let gitArticles=[],activeFilter='all',currentId=null,composerSource='claude',composerContent='';
 const LS_A='fn:articles',LS_N='fn:notes:',LS_T='fn:theme';
+let notesCache=[];
+let notesCounts={};
 
 function getLocal(){try{return JSON.parse(localStorage.getItem(LS_A)||'[]')}catch{return[]}}
 function saveLocal(a){localStorage.setItem(LS_A,JSON.stringify(a))}
@@ -335,12 +337,44 @@ function getAll(){
   const m=new Map();g.forEach(a=>m.set(a.id,a));l.forEach(a=>m.set(a.id,a));
   return[...m.values()].sort((a,b)=>b.date.localeCompare(a.date));
 }
-function getNotes(id){try{return JSON.parse(localStorage.getItem(LS_N+(id||currentId))||'[]')}catch{return[]}}
-function setNotes(n,id){localStorage.setItem(LS_N+(id||currentId),JSON.stringify(n))}
+
+async function fetchNotesCounts(){
+  try{const r=await fetch('/api/notes/counts');if(r.ok)notesCounts=await r.json()}catch{}
+}
+
+async function loadNotesForArticle(id){
+  try{
+    const r=await fetch('/api/notes/'+encodeURIComponent(id));
+    if(r.ok){notesCache=await r.json();return}
+  }catch{}
+  notesCache=[];
+}
+
+async function migrateLocalNotes(id){
+  const key=LS_N+id;
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw)return;
+    const local=JSON.parse(raw);
+    if(!Array.isArray(local)||!local.length)return;
+    for(const n of local){
+      try{
+        await fetch('/api/notes/'+encodeURIComponent(id),{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({text:n.text,highlight:!!n.highlight})
+        });
+      }catch{}
+    }
+    localStorage.removeItem(key);
+    await loadNotesForArticle(id);
+    notesCounts[id]=(notesCounts[id]||0)+local.length;
+  }catch{}
+}
 
 async function init(){
   applyTheme();
   try{const r=await fetch('posts/index.json');if(r.ok)gitArticles=await r.json()}catch{}
+  await fetchNotesCounts();
   renderGrid();
   if(location.hash){const id=location.hash.slice(1);if(id)showArticle(id)}
 }
@@ -356,7 +390,7 @@ function renderGrid(){
   if(!all.length){grid.innerHTML='';empty.style.display='block';return}
   empty.style.display='none';
   grid.innerHTML=all.map((a,i)=>{
-    const nc=getNotes(a.id).length;
+    const nc=notesCounts[a.id]||0;
     return`<div class="article-card fade-in" onclick="showArticle('${a.id}')" style="animation-delay:${i*.04}s">
       <div class="card-head"><span class="card-date">${fmtDate(a.date)}</span><div><span class="badge ${a.source}">${a.source}</span>${a._local?'<span class="local-dot" title="Saved locally"></span>':''}</div></div>
       <div class="card-title">${esc(a.title)}</div><div class="card-sub">${esc(a.subtitle||'')}</div>
@@ -389,6 +423,8 @@ async function showArticle(id){
   document.getElementById('readInfo').innerHTML=`${Math.ceil(wc/220)} min read<br>${wc} words`;
   document.getElementById('sbTags').innerHTML=a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
   document.getElementById('notesPanel').classList.remove('open');
+  await migrateLocalNotes(id);
+  await loadNotesForArticle(id);
   updateNotesLabel();renderNotes();window.scrollTo(0,0);
 }
 
@@ -407,18 +443,34 @@ window.addEventListener('scroll',()=>{
 
 // NOTES
 function toggleNotes(){document.getElementById('notesPanel').classList.toggle('open')}
-function updateNotesLabel(){const n=getNotes().length;document.getElementById('notesLabel').textContent=n?`Notes (${n})`:'Notes'}
-function addNote(text){
+function updateNotesLabel(){const n=notesCache.length;document.getElementById('notesLabel').textContent=n?`Notes (${n})`:'Notes'}
+async function addNote(text){
   const input=document.getElementById('noteInput');const t=text||input.value.trim();if(!t)return;
-  const notes=getNotes();notes.unshift({text:t,time:new Date().toISOString(),highlight:!!text});
-  setNotes(notes);if(!text)input.value='';renderNotes();updateNotesLabel();flashSave();
+  try{
+    const r=await fetch('/api/notes/'+encodeURIComponent(currentId),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:t,highlight:!!text})
+    });
+    if(r.ok){
+      const note=await r.json();
+      notesCache.unshift(note);
+      notesCounts[currentId]=(notesCounts[currentId]||0)+1;
+    }
+  }catch{}
+  if(!text)input.value='';renderNotes();updateNotesLabel();flashSave();
 }
-function deleteNote(i){const n=getNotes();n.splice(i,1);setNotes(n);renderNotes();updateNotesLabel()}
+async function deleteNote(noteId){
+  try{
+    await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
+    notesCache=notesCache.filter(n=>n.id!==noteId);
+    notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
+  }catch{}
+  renderNotes();updateNotesLabel();
+}
 function renderNotes(){
-  const notes=getNotes();
-  document.getElementById('notesList').innerHTML=notes.map((n,i)=>{
+  document.getElementById('notesList').innerHTML=notesCache.map((n)=>{
     const ts=new Date(n.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote(${i})">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
+    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote(${n.id})">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
   }).join('');
 }
 function flashSave(){const el=document.getElementById('savedFlash');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
@@ -505,7 +557,7 @@ function previewArticle(){
 
 function deleteArticle(){
   if(!currentId||!confirm('Delete this article from local storage?'))return;
-  saveLocal(getLocal().filter(a=>a.id!==currentId));localStorage.removeItem(LS_N+currentId);showIndex();
+  saveLocal(getLocal().filter(a=>a.id!==currentId));showIndex();
 }
 
 function exportArticle(){
