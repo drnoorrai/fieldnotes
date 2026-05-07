@@ -102,13 +102,13 @@ def serve_posts(filename):
     return send_from_directory("posts", filename)
 
 
-@app.route("/", defaults={"path": ""})
+@app.route("/")
+def serve_index():
+    return send_from_directory(".", "index.html")
+
+
 @app.route("/<path:path>")
 def serve_static(path):
-    if path and os.path.exists(path):
-        directory = os.path.dirname(path) or "."
-        filename = os.path.basename(path)
-        return send_from_directory(directory, filename)
     return send_from_directory(".", "index.html")
 
 

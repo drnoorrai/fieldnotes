@@ -342,12 +342,16 @@ async function fetchNotesCounts(){
   try{const r=await fetch('/api/notes/counts');if(r.ok)notesCounts=await r.json()}catch{}
 }
 
+function getLSNotes(id){try{return JSON.parse(localStorage.getItem(LS_N+(id||currentId))||'[]')}catch{return[]}}
+function setLSNotes(n,id){localStorage.setItem(LS_N+(id||currentId),JSON.stringify(n))}
+
 async function loadNotesForArticle(id){
   try{
     const r=await fetch('/api/notes/'+encodeURIComponent(id));
     if(r.ok){notesCache=await r.json();return}
   }catch{}
-  notesCache=[];
+  // fallback: load from localStorage, assign temporary string ids
+  notesCache=getLSNotes(id).map((n,i)=>({id:'ls_'+i,text:n.text,highlight:!!n.highlight,time:n.time}));
 }
 
 async function migrateLocalNotes(id){
@@ -357,17 +361,18 @@ async function migrateLocalNotes(id){
     if(!raw)return;
     const local=JSON.parse(raw);
     if(!Array.isArray(local)||!local.length)return;
+    let allOk=true;
     for(const n of local){
       try{
-        await fetch('/api/notes/'+encodeURIComponent(id),{
+        const r=await fetch('/api/notes/'+encodeURIComponent(id),{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({text:n.text,highlight:!!n.highlight})
         });
-      }catch{}
+        if(!r.ok)allOk=false;
+      }catch{allOk=false;}
     }
-    localStorage.removeItem(key);
-    await loadNotesForArticle(id);
-    notesCounts[id]=(notesCounts[id]||0)+local.length;
+    if(allOk)localStorage.removeItem(key);
+    // counts will be refreshed from the actual loaded notes after this call
   }catch{}
 }
 
@@ -446,6 +451,7 @@ function toggleNotes(){document.getElementById('notesPanel').classList.toggle('o
 function updateNotesLabel(){const n=notesCache.length;document.getElementById('notesLabel').textContent=n?`Notes (${n})`:'Notes'}
 async function addNote(text){
   const input=document.getElementById('noteInput');const t=text||input.value.trim();if(!t)return;
+  let saved=false;
   try{
     const r=await fetch('/api/notes/'+encodeURIComponent(currentId),{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -455,22 +461,37 @@ async function addNote(text){
       const note=await r.json();
       notesCache.unshift(note);
       notesCounts[currentId]=(notesCounts[currentId]||0)+1;
+      saved=true;
     }
   }catch{}
+  if(!saved){
+    // fallback: save to localStorage
+    const note={id:'ls_'+Date.now(),text:t,highlight:!!text,time:new Date().toISOString()};
+    notesCache.unshift(note);
+    const ls=getLSNotes(currentId);ls.unshift({text:t,highlight:!!text,time:note.time});
+    setLSNotes(ls,currentId);
+    notesCounts[currentId]=(notesCounts[currentId]||0)+1;
+  }
   if(!text)input.value='';renderNotes();updateNotesLabel();flashSave();
 }
 async function deleteNote(noteId){
-  try{
-    await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
-    notesCache=notesCache.filter(n=>n.id!==noteId);
-    notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
-  }catch{}
+  const strId=String(noteId);
+  const isLocal=strId.startsWith('ls_');
+  if(!isLocal){
+    try{
+      await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
+    }catch{}
+  }
+  notesCache=notesCache.filter(n=>String(n.id)!==strId);
+  // keep localStorage shadow in sync with remaining notes for offline resilience
+  setLSNotes(notesCache.map(n=>({text:n.text,highlight:n.highlight,time:n.time})),currentId);
+  notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
   renderNotes();updateNotesLabel();
 }
 function renderNotes(){
   document.getElementById('notesList').innerHTML=notesCache.map((n)=>{
     const ts=new Date(n.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote(${n.id})">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
+    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote('${n.id}')">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
   }).join('');
 }
 function flashSave(){const el=document.getElementById('savedFlash');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
