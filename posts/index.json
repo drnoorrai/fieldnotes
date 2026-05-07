@@ -7,6 +7,62 @@
     "date": "2025-05-06",
     "source": "claude",
     "category": "Strategy",
-    "tags": ["AI", "Operations", "Agentic"]
+    "tags": [
+      "AI",
+      "Operations",
+      "Agentic"
+    ]
+  },
+  {
+    "id": "building-an-ai-native-polymath-founder-brand",
+    "file": "building-an-ai-native-polymath-founder-brand.md",
+    "title": "Building an AI-Native Polymath Founder Brand",
+    "subtitle": "",
+    "date": "2026-05-07",
+    "source": "claude",
+    "category": "Research",
+    "tags": [
+      "Layer",
+      "Canonical",
+      "Thinking"
+    ]
+  },
+  {
+    "id": "stack-development",
+    "file": "stack-development.md",
+    "title": "Stack Development",
+    "subtitle": "",
+    "date": "2026-05-07",
+    "source": "claude",
+    "category": "Research",
+    "tags": []
+  },
+  {
+    "id": "agentic-ai-startup-cheat-sheet",
+    "file": "agentic-ai-startup-cheat-sheet.md",
+    "title": "Agentic AI Startup Cheat Sheet",
+    "subtitle": "",
+    "date": "2026-05-07",
+    "source": "chatgpt",
+    "category": "Research",
+    "tags": [
+      "What",
+      "best",
+      "founders"
+    ]
+  },
+  {
+    "id": "building-startups-in-the-age-of-agentic-ai",
+    "file": "building-startups-in-the-age-of-agentic-ai.md",
+    "title": "Building Startups in the Age of Agentic AI",
+    "subtitle": "",
+    "date": "2026-05-07",
+    "source": "claude",
+    "category": "Research",
+    "tags": [
+      "Executive",
+      "summary",
+      "What"
+    ]
   }
 ]
