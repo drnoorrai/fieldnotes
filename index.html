@@ -182,6 +182,11 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);line-height:
 .notes-panel textarea::placeholder{color:var(--muted-light)}
 .note-actions{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem}
 .note-save-btn{font:inherit;font-size:.76rem;font-weight:500;background:var(--ink);color:var(--paper);border:none;padding:.35rem .8rem;border-radius:4px;cursor:pointer}
+.notes-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.notes-head h4{margin:0}
+.unlock-btn{font:inherit;font-size:.7rem;color:var(--muted);background:none;border:1px solid var(--rule);border-radius:12px;padding:.2rem .6rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;transition:all var(--tr)}
+.unlock-btn:hover{border-color:var(--accent);color:var(--accent)}
+.unlock-btn svg{width:11px;height:11px}
 .saved-flash{font-size:.7rem;color:var(--green);opacity:0;transition:opacity .3s}
 .saved-flash.show{opacity:1}
 .note-item{background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:.6rem .8rem;margin-top:.5rem;position:relative}
@@ -277,9 +282,17 @@ body{font-family:var(--fb);background:var(--paper);color:var(--ink);line-height:
         </div>
       </div>
       <div class="sb-section notes-panel" id="notesPanel">
-        <h4>Your Notes</h4>
-        <textarea id="noteInput" placeholder="Write a note... (⌘+Enter to save)"></textarea>
-        <div class="note-actions"><span class="saved-flash" id="savedFlash">Saved</span><button class="note-save-btn" onclick="addNote()">Save Note</button></div>
+        <div class="notes-head">
+          <h4>Notes</h4>
+          <button class="unlock-btn" id="authorToggleBtn" onclick="toggleAuthorMode()">
+            <svg id="lockIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span id="lockLabel">Unlock</span>
+          </button>
+        </div>
+        <div id="authorWriteArea" style="display:none">
+          <textarea id="noteInput" placeholder="Write a note... (⌘+Enter to save)"></textarea>
+          <div class="note-actions"><span class="saved-flash" id="savedFlash">Saved</span><button class="note-save-btn" onclick="addNote()">Save Note</button></div>
+        </div>
         <div id="notesList"></div>
       </div>
       <div class="sb-section"><h4>Tags</h4><div class="tags" id="sbTags"></div></div>
@@ -329,6 +342,8 @@ let gitArticles=[],activeFilter='all',currentId=null,composerSource='claude',com
 const LS_A='fn:articles',LS_N='fn:notes:',LS_T='fn:theme';
 let notesCache=[];
 let notesCounts={};
+let isAuthor=false;
+let authorPassword='';
 
 function getLocal(){try{return JSON.parse(localStorage.getItem(LS_A)||'[]')}catch{return[]}}
 function saveLocal(a){localStorage.setItem(LS_A,JSON.stringify(a))}

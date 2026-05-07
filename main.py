@@ -1,4 +1,5 @@
 import os
+import secrets
 from flask import Flask, jsonify, request, send_from_directory
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -6,6 +7,7 @@ from psycopg2.extras import RealDictCursor
 app = Flask(__name__)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+NOTES_PASSWORD = os.environ.get("NOTES_PASSWORD", "")
 
 
 def get_db():
@@ -29,6 +31,24 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
+
+
+def check_auth():
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return False
+    provided = auth[len("Bearer "):]
+    return NOTES_PASSWORD and secrets.compare_digest(provided, NOTES_PASSWORD)
+
+
+@app.route("/api/auth", methods=["POST"])
+def verify_auth():
+    data = request.get_json()
+    if not data or not data.get("password"):
+        return jsonify({"error": "password required"}), 400
+    if NOTES_PASSWORD and secrets.compare_digest(data["password"], NOTES_PASSWORD):
+        return jsonify({"ok": True})
+    return jsonify({"ok": False}), 401
 
 
 @app.route("/api/notes/<article_id>", methods=["GET"])
@@ -58,6 +78,8 @@ def get_notes(article_id):
 
 @app.route("/api/notes/<article_id>", methods=["POST"])
 def add_note(article_id):
+    if not check_auth():
+        return jsonify({"error": "unauthorized"}), 401
     try:
         data = request.get_json()
         if not data or not data.get("text"):
@@ -86,6 +108,8 @@ def add_note(article_id):
 
 @app.route("/api/notes/<article_id>/<int:note_id>", methods=["DELETE"])
 def delete_note(article_id, note_id):
+    if not check_auth():
+        return jsonify({"error": "unauthorized"}), 401
     try:
         conn = get_db()
         cur = conn.cursor()
