@@ -5,761 +5,546 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Field Notes — Rai</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-<!-- Marked.js for markdown rendering -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
 <style>
-  :root {
-    --ink: #1a1a1a;
-    --ink-soft: #3a3a3a;
-    --paper: #f8f5f0;
-    --paper-dark: #eee9e0;
-    --accent: #c45d3e;
-    --accent-hover: #a94d32;
-    --accent-faint: rgba(196,93,62,0.06);
-    --green: #3a7d5c;
-    --blue: #3d6b99;
-    --muted: #8a8078;
-    --rule: #d4cdc4;
-    --white: #ffffff;
-    --tag-bg: #e6dfd6;
-    --note-bg: #fefcf9;
-    --note-border: #e8dfd4;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
-    --radius: 6px;
-    --max-w: 720px;
-    --sidebar-w: 340px;
-  }
+:root {
+  --ink:#1a1a1a;--ink-soft:#444;--paper:#f7f4ef;--paper-raised:#fff;--paper-sunken:#eee9e1;
+  --accent:#c2523c;--accent-hover:#a8432f;--accent-faint:rgba(194,82,60,.07);
+  --green:#2d7a50;--green-faint:rgba(45,122,80,.08);--blue:#3566a0;
+  --muted:#887e73;--muted-light:#b0a798;--rule:#ddd6cc;--tag-bg:#e8e1d6;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.05);--shadow-md:0 4px 20px rgba(0,0,0,.07);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.1);
+  --radius:8px;--radius-lg:12px;--tr:.2s ease;
+  --prose-w:700px;--page-w:1100px;
+  --fd:'Instrument Serif',Georgia,serif;--fb:'DM Sans',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
+}
+[data-theme="dark"]{
+  --ink:#e8e4de;--ink-soft:#bbb5ab;--paper:#1a1916;--paper-raised:#252320;--paper-sunken:#131210;
+  --accent:#e07254;--accent-hover:#f08468;--accent-faint:rgba(224,114,84,.1);
+  --green:#5cb87e;--green-faint:rgba(92,184,126,.1);--blue:#6b9fd4;
+  --muted:#8a8279;--muted-light:#5c564e;--rule:#33302b;--tag-bg:#2e2b26;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.25);--shadow-md:0 4px 20px rgba(0,0,0,.3);--shadow-lg:0 12px 40px rgba(0,0,0,.4);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--paper);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
 
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+#progressBar{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:300;width:0%;transition:width 80ms linear}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-  }
+.site-header{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);transition:background var(--tr)}
+.header-inner{max-width:var(--page-w);margin:0 auto;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:var(--fd);font-size:1.45rem;font-weight:400;letter-spacing:-.02em;cursor:pointer;user-select:none}
+.logo em{color:var(--accent);font-style:normal}
+.header-right{display:flex;align-items:center;gap:.6rem}
 
-  /* ══════════════ PROGRESS BAR ══════════════ */
-  .progress-bar {
-    position: fixed; top: 0; left: 0;
-    height: 2px; background: var(--accent);
-    z-index: 200; width: 0%;
-    transition: width 0.1s linear;
-  }
+.search-wrap{display:flex;align-items:center;background:var(--paper-sunken);border:1px solid transparent;border-radius:22px;padding:.35rem .8rem;gap:.4rem;transition:border-color var(--tr),background var(--tr)}
+.search-wrap:focus-within{border-color:var(--accent);background:var(--paper-raised)}
+.search-wrap svg{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+.search-wrap input{border:none;outline:none;background:none;font:inherit;font-size:.82rem;color:var(--ink);width:150px}
+.search-wrap input::placeholder{color:var(--muted-light)}
 
-  /* ══════════════ HEADER ══════════════ */
-  .site-header {
-    border-bottom: 1px solid var(--rule);
-    padding: 1.4rem 2rem;
-    display: flex; justify-content: space-between; align-items: center;
-    max-width: 1140px; margin: 0 auto;
-    position: sticky; top: 0; background: var(--paper);
-    z-index: 100;
-  }
-  .site-header h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.5rem; font-weight: 400; letter-spacing: -0.02em;
-    cursor: pointer;
-  }
-  .site-header h1 span { color: var(--accent); }
-  .header-actions { display: flex; gap: 0.8rem; align-items: center; }
+.icon-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--rule);background:var(--paper-raised);cursor:pointer;color:var(--muted);transition:all var(--tr)}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-btn svg{width:16px;height:16px}
 
-  .search-box {
-    display: flex; align-items: center; gap: 0.5rem;
-    background: var(--white); border: 1px solid var(--rule);
-    border-radius: 20px; padding: 0.4rem 0.9rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .search-box:focus-within {
-    border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-faint);
-  }
-  .search-box svg { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; }
-  .search-box input {
-    border: none; outline: none; background: none;
-    font-family: inherit; font-size: 0.82rem;
-    color: var(--ink); width: 160px;
-  }
-  .search-box input::placeholder { color: var(--muted); }
+.add-btn{display:flex;align-items:center;gap:.35rem;background:var(--accent);color:#fff;border:none;padding:.4rem .9rem .4rem .7rem;border-radius:22px;font:inherit;font-size:.8rem;font-weight:500;cursor:pointer;transition:background var(--tr)}
+.add-btn:hover{background:var(--accent-hover)}
+.add-btn svg{width:15px;height:15px}
 
-  .filter-btn {
-    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
-    color: var(--muted); background: none; border: 1px solid var(--rule);
-    padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer;
-    transition: all 0.2s;
-  }
-  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.index-view{max-width:var(--page-w);margin:0 auto;padding:2.5rem 2rem 4rem}
+.index-view.hidden{display:none}
+.index-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.index-intro p{color:var(--muted);font-size:.9rem;max-width:500px}
 
-  /* ══════════════ INDEX ══════════════ */
-  .index-view {
-    max-width: 1140px; margin: 0 auto; padding: 2.5rem 2rem;
-  }
-  .index-intro {
-    max-width: 580px; margin-bottom: 1.5rem;
-  }
-  .index-intro p {
-    color: var(--muted); font-size: 0.92rem; line-height: 1.6;
-  }
+.filters{display:flex;gap:.4rem}
+.filter-pill{font:inherit;font-size:.72rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:none;border:1px solid var(--rule);padding:.35rem .75rem;border-radius:20px;cursor:pointer;transition:all var(--tr)}
+.filter-pill:hover{border-color:var(--accent);color:var(--accent)}
+.filter-pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-  .source-filters {
-    display: flex; gap: 0.5rem; margin-bottom: 2rem;
-  }
+.article-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.2rem}
+.article-card{background:var(--paper-raised);border:1px solid var(--rule);border-radius:var(--radius);padding:1.5rem 1.6rem;cursor:pointer;display:flex;flex-direction:column;transition:transform var(--tr),box-shadow var(--tr)}
+.article-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.card-date{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.badge{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;padding:.15rem .5rem;border-radius:3px;font-weight:600}
+.badge.claude{background:var(--accent-faint);color:var(--accent)}
+.badge.chatgpt{background:var(--green-faint);color:var(--green)}
+.card-title{font-family:var(--fd);font-size:1.25rem;line-height:1.25;margin-bottom:.4rem;font-weight:400}
+.card-sub{color:var(--muted);font-size:.82rem;line-height:1.45;flex:1}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.9rem}
+.tags{display:flex;gap:.3rem;flex-wrap:wrap}
+.tag{font-size:.66rem;background:var(--tag-bg);color:var(--muted);padding:.15rem .45rem;border-radius:3px;letter-spacing:.03em;text-transform:uppercase}
+.note-indicator{font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:.25rem}
+.note-indicator svg{width:12px;height:12px}
+.local-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-left:.4rem;vertical-align:middle}
+.empty-msg{text-align:center;padding:4rem;color:var(--muted);font-size:.9rem}
 
-  .article-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-    gap: 1.4rem;
-  }
-  .article-card {
-    background: var(--white); border: 1px solid var(--rule);
-    border-radius: var(--radius); padding: 1.6rem 1.8rem;
-    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    display: flex; flex-direction: column;
-    position: relative;
-  }
-  .article-card:hover {
-    transform: translateY(-2px); box-shadow: var(--shadow-md);
-  }
-  .card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 0.6rem;
-  }
-  .card-meta {
-    font-size: 0.72rem; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--muted);
-  }
-  .source-badge {
-    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;
-    padding: 0.2rem 0.55rem; border-radius: 3px; font-weight: 500;
-  }
-  .source-badge.claude { background: #f0e6dc; color: var(--accent); }
-  .source-badge.chatgpt { background: #dce8dc; color: var(--green); }
-  .card-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.3rem; line-height: 1.25;
-    margin-bottom: 0.5rem; font-weight: 400;
-  }
-  .card-excerpt {
-    color: var(--muted); font-size: 0.83rem; line-height: 1.5; flex: 1;
-  }
-  .card-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 1rem;
-  }
-  .card-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
-  .tag {
-    font-size: 0.68rem; background: var(--tag-bg); color: var(--muted);
-    padding: 0.18rem 0.5rem; border-radius: 3px;
-    letter-spacing: 0.03em; text-transform: uppercase;
-  }
-  .note-count {
-    font-size: 0.72rem; color: var(--muted);
-    display: flex; align-items: center; gap: 0.3rem;
-  }
-  .note-count svg { width: 13px; height: 13px; }
+/* COMPOSER MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:2rem}
+.modal-overlay.open{display:flex}
+.composer{background:var(--paper-raised);border-radius:var(--radius-lg);width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.composer-header{padding:1.4rem 1.6rem 0;display:flex;justify-content:space-between;align-items:center}
+.composer-header h3{font-family:var(--fd);font-size:1.3rem;font-weight:400}
+.close-btn{width:30px;height:30px;border-radius:50%;border:none;background:var(--paper-sunken);cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all var(--tr)}
+.close-btn:hover{background:var(--accent-faint);color:var(--accent)}
+.composer-body{padding:1.2rem 1.6rem 1.6rem}
 
-  .empty-state {
-    text-align: center; padding: 4rem 2rem; color: var(--muted);
-  }
-  .empty-state p { font-size: 0.9rem; }
+.drop-zone{border:2px dashed var(--rule);border-radius:var(--radius);padding:2rem;text-align:center;margin-bottom:1rem;transition:all var(--tr);cursor:pointer;position:relative}
+.drop-zone.dragover{border-color:var(--accent);background:var(--accent-faint)}
+.drop-zone.has-content{border-style:solid;border-color:var(--green);background:var(--green-faint)}
+.drop-zone-label{color:var(--muted);font-size:.85rem}
+.drop-zone-label strong{color:var(--ink)}
+.drop-zone-hint{font-size:.72rem;color:var(--muted-light);margin-top:.3rem}
+.drop-zone-preview{display:none;text-align:left;font-size:.82rem;color:var(--ink-soft);max-height:200px;overflow-y:auto;line-height:1.5;font-family:var(--fm)}
+.drop-zone.has-content .drop-zone-label{display:none}
+.drop-zone.has-content .drop-zone-hint{display:none}
+.drop-zone.has-content .drop-zone-preview{display:block}
+.paste-area{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;resize:none;border:none}
 
-  /* ══════════════ ARTICLE VIEW ══════════════ */
-  .article-view { display: none; }
-  .article-view.active { display: block; }
-  .index-view.hidden { display: none; }
+.field-row{display:flex;gap:.8rem;margin-bottom:.8rem}
+.field{flex:1}
+.field label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.3rem;font-weight:500}
+.field input,.field select{width:100%;padding:.5rem .7rem;border:1px solid var(--rule);border-radius:5px;background:var(--paper);font:inherit;font-size:.88rem;color:var(--ink);outline:none;transition:border-color var(--tr)}
+.field input:focus,.field select:focus{border-color:var(--accent)}
 
-  .article-hero {
-    max-width: 1140px; margin: 0 auto;
-    padding: 2.5rem 2rem 1.5rem;
-  }
-  .back-link {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--muted); text-decoration: none; cursor: pointer;
-    margin-bottom: 1.8rem; transition: color 0.2s;
-  }
-  .back-link:hover { color: var(--accent); }
-  .back-link svg { width: 14px; height: 14px; }
+.source-toggle{display:flex;gap:.5rem;margin-bottom:.8rem}
+.source-opt{flex:1;padding:.5rem;text-align:center;border:1px solid var(--rule);border-radius:5px;font-size:.82rem;font-weight:500;cursor:pointer;transition:all var(--tr);background:var(--paper)}
+.source-opt:hover{border-color:var(--accent)}
+.source-opt.on.claude{border-color:var(--accent);background:var(--accent-faint);color:var(--accent)}
+.source-opt.on.chatgpt{border-color:var(--green);background:var(--green-faint);color:var(--green)}
 
-  .hero-meta {
-    display: flex; align-items: center; gap: 0.8rem;
-    margin-bottom: 0.8rem;
-  }
-  .hero-meta .meta-text {
-    font-size: 0.76rem; text-transform: uppercase;
-    letter-spacing: 0.06em; color: var(--accent);
-  }
-  .article-hero h2 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    font-weight: 400; line-height: 1.15;
-    letter-spacing: -0.02em; max-width: 700px;
-  }
-  .article-hero .subtitle {
-    color: var(--muted); font-size: 1rem;
-    margin-top: 0.8rem; max-width: 600px; line-height: 1.5;
-  }
+.composer-actions{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--rule)}
+.preview-btn{font:inherit;font-size:.82rem;color:var(--muted);background:none;border:1px solid var(--rule);padding:.45rem 1rem;border-radius:5px;cursor:pointer;transition:all var(--tr)}
+.preview-btn:hover{border-color:var(--accent);color:var(--accent)}
+.save-btn{font:inherit;font-size:.85rem;font-weight:500;color:#fff;background:var(--accent);border:none;padding:.5rem 1.4rem;border-radius:6px;cursor:pointer;transition:background var(--tr)}
+.save-btn:hover{background:var(--accent-hover)}
+.save-btn:disabled{opacity:.4;cursor:not-allowed}
 
-  .article-layout {
-    max-width: 1140px; margin: 0 auto;
-    padding: 1.5rem 2rem 4rem;
-    display: grid;
-    grid-template-columns: var(--max-w) 1fr;
-    gap: 3rem;
-  }
+/* ARTICLE VIEW */
+.article-view{display:none}
+.article-view.active{display:block}
+.article-hero{max-width:var(--page-w);margin:0 auto;padding:2.5rem 2rem 1.2rem}
+.back-link{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);cursor:pointer;margin-bottom:1.6rem;text-decoration:none;transition:color var(--tr)}
+.back-link:hover{color:var(--accent)}
+.back-link svg{width:14px;height:14px}
+.hero-meta{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+.hero-meta .meta-text{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.article-hero h2{font-family:var(--fd);font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:400;line-height:1.15;letter-spacing:-.015em;max-width:var(--prose-w)}
+.article-hero .subtitle{color:var(--muted);font-size:.95rem;margin-top:.7rem;max-width:580px;line-height:1.5}
 
-  /* ══════════════ PROSE ══════════════ */
-  .prose h1 { display: none; } /* hide the md title since we show it in hero */
-  .prose h2 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.55rem; font-weight: 400;
-    margin: 2.5rem 0 0.7rem;
-    letter-spacing: -0.01em;
-    padding-left: 1rem; position: relative;
-  }
-  .prose h2::before {
-    content: ''; position: absolute; left: 0;
-    top: 0.2em; bottom: 0.2em;
-    width: 3px; background: var(--accent); border-radius: 2px;
-  }
-  .prose h3 {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1rem; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 0.04em;
-    margin: 2rem 0 0.5rem; color: var(--muted);
-  }
-  .prose p { margin-bottom: 1rem; font-size: 0.97rem; }
-  .prose ul, .prose ol { margin: 0.6rem 0 1.1rem 1.4rem; }
-  .prose li { margin-bottom: 0.35rem; font-size: 0.93rem; }
-  .prose strong { font-weight: 500; }
-  .prose code {
-    font-family: 'JetBrains Mono', monospace; font-size: 0.82em;
-    background: var(--paper-dark); padding: 0.12em 0.4em; border-radius: 3px;
-  }
-  .prose pre {
-    background: var(--ink); color: #e0ddd8;
-    padding: 1.2rem 1.4rem; border-radius: var(--radius);
-    overflow-x: auto; margin: 1.2rem 0;
-    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-    line-height: 1.6;
-  }
-  .prose pre code { background: none; padding: 0; color: inherit; }
-  .prose blockquote {
-    border-left: 3px solid var(--accent-faint);
-    border-left-color: var(--accent);
-    padding: 0.7rem 1.2rem; margin: 1.4rem 0;
-    background: var(--accent-faint);
-    border-radius: 0 4px 4px 0;
-    font-style: italic; color: var(--ink-soft);
-  }
-  .prose blockquote p { margin-bottom: 0; }
-  .prose table {
-    width: 100%; border-collapse: collapse;
-    margin: 1.4rem 0; font-size: 0.86rem;
-  }
-  .prose th {
-    text-align: left; font-weight: 500;
-    text-transform: uppercase; font-size: 0.7rem;
-    letter-spacing: 0.06em; color: var(--muted);
-    border-bottom: 2px solid var(--rule); padding: 0.5rem 0.7rem;
-  }
-  .prose td {
-    padding: 0.55rem 0.7rem;
-    border-bottom: 1px solid var(--rule); vertical-align: top;
-  }
-  .prose img {
-    max-width: 100%; border-radius: var(--radius);
-    margin: 1rem 0;
-  }
-  .prose hr {
-    border: none; border-top: 1px solid var(--rule);
-    margin: 2rem 0;
-  }
+.article-layout{max-width:var(--page-w);margin:0 auto;padding:1.2rem 2rem 5rem;display:grid;grid-template-columns:var(--prose-w) 1fr;gap:3rem}
 
-  /* ══════════════ SIDEBAR ══════════════ */
-  .sidebar {
-    position: sticky; top: 5rem; align-self: start;
-  }
-  .sidebar-section { margin-bottom: 1.8rem; }
-  .sidebar-section h4 {
-    font-size: 0.68rem; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--muted);
-    margin-bottom: 0.7rem;
-  }
-  .toc-list { list-style: none; }
-  .toc-list li { margin-bottom: 0.4rem; }
-  .toc-list a {
-    font-size: 0.8rem; color: var(--muted);
-    text-decoration: none; transition: color 0.2s;
-    line-height: 1.35; display: block;
-  }
-  .toc-list a:hover { color: var(--accent); }
-  .reading-meta {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem; color: var(--muted);
-    line-height: 1.8;
-  }
+/* PROSE */
+.prose h1{display:none}
+.prose h2{font-family:var(--fd);font-size:1.5rem;font-weight:400;margin:2.5rem 0 .6rem;letter-spacing:-.01em;padding-left:.9rem;position:relative}
+.prose h2::before{content:'';position:absolute;left:0;top:.18em;bottom:.18em;width:3px;background:var(--accent);border-radius:2px}
+.prose h3{font-family:var(--fb);font-size:.95rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:2rem 0 .5rem;color:var(--muted)}
+.prose h4{font-size:.9rem;font-weight:500;margin:1.5rem 0 .4rem}
+.prose p{margin-bottom:1rem;font-size:.95rem}
+.prose ul,.prose ol{margin:.5rem 0 1rem 1.3rem}
+.prose li{margin-bottom:.3rem;font-size:.92rem}
+.prose strong{font-weight:600}
+.prose code{font-family:var(--fm);font-size:.82em;background:var(--paper-sunken);padding:.12em .35em;border-radius:3px}
+.prose pre{background:#1e1d1a;color:#d8d4cc;padding:1.1rem 1.3rem;border-radius:var(--radius);overflow-x:auto;margin:1.2rem 0;font-family:var(--fm);font-size:.8rem;line-height:1.6}
+.prose pre code{background:none;padding:0;color:inherit}
+.prose blockquote{border-left:3px solid var(--accent);padding:.6rem 1.1rem;margin:1.2rem 0;background:var(--accent-faint);border-radius:0 var(--radius) var(--radius) 0;font-style:italic;color:var(--ink-soft)}
+.prose blockquote p{margin-bottom:0}
+.prose table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.84rem}
+.prose th{text-align:left;font-weight:600;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--rule);padding:.5rem .6rem}
+.prose td{padding:.5rem .6rem;border-bottom:1px solid var(--rule);vertical-align:top}
+.prose hr{border:none;border-top:1px solid var(--rule);margin:2rem 0}
+.prose img{max-width:100%;border-radius:var(--radius);margin:1rem 0}
 
-  /* ══════════════ NOTES PANEL ══════════════ */
-  .notes-toggle {
-    display: flex; align-items: center; gap: 0.4rem;
-    background: var(--accent); color: var(--paper);
-    border: none; padding: 0.5rem 1rem;
-    border-radius: 20px; font-family: inherit;
-    font-size: 0.78rem; font-weight: 500;
-    cursor: pointer; transition: background 0.2s;
-    letter-spacing: 0.02em;
-  }
-  .notes-toggle:hover { background: var(--accent-hover); }
-  .notes-toggle svg { width: 14px; height: 14px; }
+/* SIDEBAR */
+.sidebar{position:sticky;top:5rem;align-self:start}
+.sb-section{margin-bottom:1.6rem}
+.sb-section h4{font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.6rem}
+.toc-list{list-style:none}
+.toc-list li{margin-bottom:.35rem}
+.toc-list a{font-size:.78rem;color:var(--muted);text-decoration:none;line-height:1.35;display:block;transition:color var(--tr)}
+.toc-list a:hover{color:var(--accent)}
+.reading-info{font-family:var(--fm);font-size:.7rem;color:var(--muted);line-height:1.9}
 
-  .notes-panel {
-    background: var(--note-bg);
-    border: 1px solid var(--note-border);
-    border-radius: var(--radius);
-    padding: 1.2rem;
-    margin-top: 0.8rem;
-    display: none;
-  }
-  .notes-panel.open { display: block; }
+.sb-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.sb-btn{display:flex;align-items:center;gap:.3rem;font:inherit;font-size:.76rem;font-weight:500;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--rule);background:var(--paper-raised);color:var(--muted);cursor:pointer;transition:all var(--tr)}
+.sb-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sb-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sb-btn.primary:hover{background:var(--accent-hover)}
+.sb-btn svg{width:13px;height:13px}
 
-  .notes-panel textarea {
-    width: 100%; min-height: 140px;
-    background: var(--white); border: 1px solid var(--rule);
-    border-radius: 4px; padding: 0.8rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem; line-height: 1.6;
-    color: var(--ink); resize: vertical;
-    outline: none; transition: border-color 0.2s;
-  }
-  .notes-panel textarea:focus {
-    border-color: var(--accent);
-  }
-  .notes-panel textarea::placeholder { color: var(--muted); }
+/* NOTES */
+.notes-panel{display:none}
+.notes-panel.open{display:block}
+.notes-panel textarea{width:100%;min-height:100px;background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:.7rem;font:inherit;font-size:.83rem;line-height:1.5;color:var(--ink);resize:vertical;outline:none;transition:border-color var(--tr)}
+.notes-panel textarea:focus{border-color:var(--accent)}
+.notes-panel textarea::placeholder{color:var(--muted-light)}
+.note-actions{display:flex;justify-content:space-between;align-items:center;margin-top:.4rem}
+.note-save-btn{font:inherit;font-size:.76rem;font-weight:500;background:var(--ink);color:var(--paper);border:none;padding:.35rem .8rem;border-radius:4px;cursor:pointer}
+.saved-flash{font-size:.7rem;color:var(--green);opacity:0;transition:opacity .3s}
+.saved-flash.show{opacity:1}
+.note-item{background:var(--paper);border:1px solid var(--rule);border-radius:5px;padding:.6rem .8rem;margin-top:.5rem;position:relative}
+.note-item p{font-size:.8rem;line-height:1.45;white-space:pre-wrap;color:var(--ink-soft)}
+.note-item .note-time{font-family:var(--fm);font-size:.66rem;color:var(--muted);margin-top:.25rem}
+.note-item .note-del{position:absolute;top:.4rem;right:.4rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;opacity:0;transition:opacity var(--tr)}
+.note-item:hover .note-del{opacity:1}
+.note-item .note-del:hover{color:var(--accent)}
+.note-item.hl{border-left:3px solid var(--accent)}
+.note-item .hl-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:500;margin-bottom:.2rem}
 
-  .notes-actions {
-    display: flex; justify-content: space-between;
-    align-items: center; margin-top: 0.6rem;
-  }
-  .save-indicator {
-    font-size: 0.72rem; color: var(--green);
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .save-indicator.show { opacity: 1; }
+/* EXPORT */
+.export-modal{display:none}
+.export-modal.open{display:flex}
+.export-content{background:var(--paper-raised);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);padding:1.4rem 1.6rem;animation:modalIn .25s ease}
+.export-content h3{font-family:var(--fd);font-size:1.2rem;font-weight:400;margin-bottom:.6rem}
+.export-content>p{font-size:.85rem;color:var(--muted);margin-bottom:.8rem}
+.export-block{background:var(--paper-sunken);border-radius:5px;padding:.8rem;margin-bottom:.8rem}
+.export-block label{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500;margin-bottom:.3rem;display:block}
+.export-block pre{font-family:var(--fm);font-size:.75rem;white-space:pre-wrap;word-break:break-all;color:var(--ink);line-height:1.5;max-height:200px;overflow-y:auto}
+.copy-btn{font:inherit;font-size:.75rem;background:var(--ink);color:var(--paper);border:none;padding:.35rem .8rem;border-radius:4px;cursor:pointer;margin-top:.4rem}
 
-  .saved-notes { margin-top: 1rem; }
-  .saved-note {
-    background: var(--white); border: 1px solid var(--rule);
-    border-radius: 4px; padding: 0.7rem 0.9rem;
-    margin-bottom: 0.5rem; position: relative;
-  }
-  .saved-note p {
-    font-size: 0.83rem; line-height: 1.5;
-    white-space: pre-wrap; color: var(--ink-soft);
-  }
-  .saved-note .note-time {
-    font-size: 0.68rem; color: var(--muted);
-    margin-top: 0.3rem;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .saved-note .delete-note {
-    position: absolute; top: 0.5rem; right: 0.5rem;
-    background: none; border: none; color: var(--muted);
-    cursor: pointer; font-size: 0.9rem; line-height: 1;
-    padding: 0.2rem; opacity: 0; transition: opacity 0.2s;
-  }
-  .saved-note:hover .delete-note { opacity: 1; }
-  .saved-note .delete-note:hover { color: var(--accent); }
+/* SELECTION POPUP */
+.sel-popup{position:fixed;z-index:250;background:var(--ink);color:var(--paper);padding:.35rem .7rem;border-radius:5px;font-size:.75rem;font-weight:500;cursor:pointer;user-select:none;box-shadow:var(--shadow-md);display:none;white-space:nowrap}
+.sel-popup::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid var(--ink)}
 
-  .note-add-btn {
-    background: var(--ink); color: var(--paper);
-    border: none; padding: 0.4rem 0.9rem;
-    border-radius: 4px; font-family: inherit;
-    font-size: 0.78rem; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .note-add-btn:hover { background: var(--ink-soft); }
+.site-footer{border-top:1px solid var(--rule);padding:1.8rem 2rem;text-align:center;font-size:.74rem;color:var(--muted);max-width:var(--page-w);margin:0 auto}
 
-  /* ══════════════ FOOTER ══════════════ */
-  .site-footer {
-    border-top: 1px solid var(--rule);
-    padding: 2rem; text-align: center;
-    font-size: 0.76rem; color: var(--muted);
-    max-width: 1140px; margin: 0 auto;
-  }
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .35s ease forwards;opacity:0}
 
-  /* ══════════════ ANIMATIONS ══════════════ */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .fade-in {
-    animation: fadeUp 0.4s ease forwards; opacity: 0;
-  }
-
-  /* ══════════════ RESPONSIVE ══════════════ */
-  @media (max-width: 860px) {
-    .article-layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .site-header, .index-view, .article-hero, .article-layout {
-      padding-left: 1.2rem; padding-right: 1.2rem;
-    }
-    .search-box input { width: 120px; }
-    .article-grid { grid-template-columns: 1fr; }
-  }
+@media(max-width:860px){
+  .article-layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .header-inner,.index-view,.article-hero,.article-layout{padding-left:1.2rem;padding-right:1.2rem}
+  .search-wrap input{width:100px}
+  .article-grid{grid-template-columns:1fr}
+  .field-row{flex-direction:column;gap:.6rem}
+}
 </style>
 </head>
 <body>
+<div id="progressBar"></div>
+<div class="sel-popup" id="selPopup" onclick="saveHighlight()">Save as note</div>
 
-<div class="progress-bar" id="progressBar"></div>
-
-<!-- ═══════ HEADER ═══════ -->
-<header class="site-header">
-  <h1 onclick="showIndex()"><span>Field</span> Notes</h1>
-  <div class="header-actions">
-    <div class="search-box">
+<header class="site-header"><div class="header-inner">
+  <div class="logo" onclick="showIndex()"><em>Field</em> Notes</div>
+  <div class="header-right">
+    <div class="search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" placeholder="Search articles..." id="searchInput" oninput="filterArticles()">
+      <input type="text" placeholder="Search..." id="searchInput" oninput="filterCards()">
+    </div>
+    <button class="add-btn" onclick="openComposer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>
+    </button>
+  </div>
+</div></header>
+
+<main class="index-view" id="indexView">
+  <div class="index-header">
+    <div class="index-intro"><p>Deep research from Claude &amp; ChatGPT — saved, annotated, revisited.</p></div>
+    <div class="filters">
+      <button class="filter-pill on" onclick="setFilter('all',this)">All</button>
+      <button class="filter-pill" onclick="setFilter('claude',this)">Claude</button>
+      <button class="filter-pill" onclick="setFilter('chatgpt',this)">ChatGPT</button>
     </div>
   </div>
-</header>
-
-<!-- ═══════ INDEX ═══════ -->
-<main class="index-view" id="indexView">
-  <div class="index-intro fade-in">
-    <p>Deep research articles, frameworks, and thinking from Claude and ChatGPT — saved, annotated, and revisited.</p>
-  </div>
-  <div class="source-filters" id="sourceFilters">
-    <button class="filter-btn active" onclick="setFilter('all')">All</button>
-    <button class="filter-btn" onclick="setFilter('claude')">Claude</button>
-    <button class="filter-btn" onclick="setFilter('chatgpt')">ChatGPT</button>
-  </div>
-  <div class="article-grid" id="articleGrid"></div>
-  <div class="empty-state" id="emptyState" style="display:none">
-    <p>No articles match your search.</p>
-  </div>
+  <div class="article-grid" id="grid"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none">No articles match your search.</div>
 </main>
 
-<!-- ═══════ ARTICLE VIEW ═══════ -->
 <section class="article-view" id="articleView">
   <div class="article-hero">
-    <a class="back-link" onclick="showIndex()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Back to Archive
-    </a>
-    <div class="hero-meta">
-      <span class="source-badge" id="heroBadge"></span>
-      <span class="meta-text" id="heroMeta"></span>
-    </div>
+    <a class="back-link" onclick="showIndex()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Archive</a>
+    <div class="hero-meta"><span class="badge" id="heroBadge"></span><span class="meta-text" id="heroMeta"></span></div>
     <h2 id="heroTitle"></h2>
-    <p class="subtitle" id="heroSubtitle"></p>
+    <p class="subtitle" id="heroSub"></p>
   </div>
   <div class="article-layout">
-    <div>
-      <article class="prose" id="articleBody"></article>
-    </div>
-    <aside class="sidebar" id="articleSidebar">
-      <div class="sidebar-section">
-        <div class="reading-meta" id="readingMeta"></div>
-      </div>
-      <div class="sidebar-section" id="tocSection"></div>
-      <div class="sidebar-section">
-        <button class="notes-toggle" onclick="toggleNotes()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          <span id="notesToggleLabel">Notes</span>
-        </button>
-        <div class="notes-panel" id="notesPanel">
-          <textarea id="noteInput" placeholder="Write your notes on this article..."></textarea>
-          <div class="notes-actions">
-            <span class="save-indicator" id="saveIndicator">Saved</span>
-            <button class="note-add-btn" onclick="addNote()">Add Note</button>
-          </div>
-          <div class="saved-notes" id="savedNotes"></div>
+    <article class="prose" id="proseBody"></article>
+    <aside class="sidebar">
+      <div class="sb-section"><div class="reading-info" id="readInfo"></div></div>
+      <div class="sb-section" id="tocWrap"></div>
+      <div class="sb-section">
+        <h4>Actions</h4>
+        <div class="sb-actions">
+          <button class="sb-btn primary" onclick="toggleNotes()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span id="notesLabel">Notes</span></button>
+          <button class="sb-btn" onclick="exportArticle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Export</button>
+          <button class="sb-btn" onclick="deleteArticle()" id="deleteBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Delete</button>
         </div>
       </div>
-      <div class="sidebar-section">
-        <h4>Tags</h4>
-        <div class="card-tags" id="sidebarTags"></div>
+      <div class="sb-section notes-panel" id="notesPanel">
+        <h4>Your Notes</h4>
+        <textarea id="noteInput" placeholder="Write a note... (⌘+Enter to save)"></textarea>
+        <div class="note-actions"><span class="saved-flash" id="savedFlash">Saved</span><button class="note-save-btn" onclick="addNote()">Save Note</button></div>
+        <div id="notesList"></div>
       </div>
+      <div class="sb-section"><h4>Tags</h4><div class="tags" id="sbTags"></div></div>
     </aside>
   </div>
 </section>
 
-<footer class="site-footer">
-  Field Notes · A reading journal by Rai
-</footer>
+<div class="modal-overlay" id="composerModal"><div class="composer">
+  <div class="composer-header"><h3>Add Article</h3><button class="close-btn" onclick="closeComposer()">&times;</button></div>
+  <div class="composer-body">
+    <div class="drop-zone" id="dropZone">
+      <textarea class="paste-area" id="pasteArea" placeholder="Paste article content here..." oninput="handlePaste()"></textarea>
+      <div class="drop-zone-label"><strong>Paste or drop</strong> your article content</div>
+      <div class="drop-zone-hint">Markdown or plain text from Claude / ChatGPT</div>
+      <div class="drop-zone-preview" id="dropPreview"></div>
+    </div>
+    <div class="field-row"><div class="field"><label>Title (auto-detected)</label><input type="text" id="cTitle" placeholder="Auto-fills from content..."></div></div>
+    <div class="field-row"><div class="field"><label>Subtitle</label><input type="text" id="cSubtitle" placeholder="One-line summary..."></div></div>
+    <label style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:500;margin-bottom:.3rem;display:block">Source</label>
+    <div class="source-toggle">
+      <div class="source-opt claude on" onclick="pickSource('claude',this)">Claude</div>
+      <div class="source-opt chatgpt" onclick="pickSource('chatgpt',this)">ChatGPT</div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Category</label><input type="text" id="cCategory" placeholder="Strategy, Research..." value="Research"></div>
+      <div class="field"><label>Tags (comma-separated)</label><input type="text" id="cTags" placeholder="AI, Health, Ops..."></div>
+    </div>
+    <div class="composer-actions">
+      <button class="preview-btn" onclick="previewArticle()">Preview</button>
+      <button class="save-btn" id="saveArticleBtn" onclick="saveArticle()" disabled>Save Article</button>
+    </div>
+  </div>
+</div></div>
+
+<div class="modal-overlay export-modal" id="exportModal"><div class="export-content">
+  <h3>Export to Git</h3>
+  <p>Copy these to back up this article to your fieldnotes repo.</p>
+  <div class="export-block"><label>1. Save as <code id="exportFilename"></code> in posts/</label><pre id="exportMd"></pre><button class="copy-btn" onclick="copyExport('exportMd')">Copy Markdown</button></div>
+  <div class="export-block"><label>2. Add to posts/index.json</label><pre id="exportJson"></pre><button class="copy-btn" onclick="copyExport('exportJson')">Copy JSON</button></div>
+  <div style="text-align:right;margin-top:.6rem"><button class="close-btn" onclick="document.getElementById('exportModal').classList.remove('open')" style="width:auto;height:auto;border-radius:5px;padding:.4rem 1rem;font-size:.82rem">Close</button></div>
+</div></div>
+
+<footer class="site-footer">Field Notes · A reading journal by Rai</footer>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════
-let articles = [];
-let currentFilter = 'all';
-let currentArticleId = null;
+let gitArticles=[],activeFilter='all',currentId=null,composerSource='claude',composerContent='';
+const LS_A='fn:articles',LS_N='fn:notes:',LS_T='fn:theme';
 
-// ═══════════════════════════════════════════════════════
-//  LOAD MANIFEST + ARTICLES
-// ═══════════════════════════════════════════════════════
-async function init() {
-  try {
-    const res = await fetch('posts/index.json');
-    articles = await res.json();
-    renderIndex();
+function getLocal(){try{return JSON.parse(localStorage.getItem(LS_A)||'[]')}catch{return[]}}
+function saveLocal(a){localStorage.setItem(LS_A,JSON.stringify(a))}
+function getAll(){
+  const l=getLocal().map(a=>({...a,_local:true})),g=gitArticles.map(a=>({...a,_local:false}));
+  const m=new Map();g.forEach(a=>m.set(a.id,a));l.forEach(a=>m.set(a.id,a));
+  return[...m.values()].sort((a,b)=>b.date.localeCompare(a.date));
+}
+function getNotes(id){try{return JSON.parse(localStorage.getItem(LS_N+(id||currentId))||'[]')}catch{return[]}}
+function setNotes(n,id){localStorage.setItem(LS_N+(id||currentId),JSON.stringify(n))}
 
-    // Check if URL hash points to an article
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      const article = articles.find(a => a.id === id);
-      if (article) showArticle(id);
-    }
-  } catch (e) {
-    console.error('Failed to load manifest:', e);
-    document.getElementById('articleGrid').innerHTML =
-      '<div class="empty-state"><p>Could not load articles. Make sure posts/index.json exists.</p></div>';
-  }
+async function init(){
+  applyTheme();
+  try{const r=await fetch('posts/index.json');if(r.ok)gitArticles=await r.json()}catch{}
+  renderGrid();
+  if(location.hash){const id=location.hash.slice(1);if(id)showArticle(id)}
 }
 
-// ═══════════════════════════════════════════════════════
-//  INDEX RENDERING
-// ═══════════════════════════════════════════════════════
-function renderIndex() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const filtered = articles.filter(a => {
-    const matchSource = currentFilter === 'all' || a.source === currentFilter;
-    const matchSearch = !search ||
-      a.title.toLowerCase().includes(search) ||
-      a.category.toLowerCase().includes(search) ||
-      a.tags.some(t => t.toLowerCase().includes(search)) ||
-      (a.subtitle && a.subtitle.toLowerCase().includes(search));
-    return matchSource && matchSearch;
+function renderGrid(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const all=getAll().filter(a=>{
+    if(activeFilter!=='all'&&a.source!==activeFilter)return false;
+    if(!q)return true;
+    return a.title.toLowerCase().includes(q)||(a.subtitle||'').toLowerCase().includes(q)||a.category.toLowerCase().includes(q)||a.tags.some(t=>t.toLowerCase().includes(q));
   });
+  const grid=document.getElementById('grid'),empty=document.getElementById('emptyMsg');
+  if(!all.length){grid.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  grid.innerHTML=all.map((a,i)=>{
+    const nc=getNotes(a.id).length;
+    return`<div class="article-card fade-in" onclick="showArticle('${a.id}')" style="animation-delay:${i*.04}s">
+      <div class="card-head"><span class="card-date">${fmtDate(a.date)}</span><div><span class="badge ${a.source}">${a.source}</span>${a._local?'<span class="local-dot" title="Saved locally"></span>':''}</div></div>
+      <div class="card-title">${esc(a.title)}</div><div class="card-sub">${esc(a.subtitle||'')}</div>
+      <div class="card-foot"><div class="tags">${a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>${nc?`<span class="note-indicator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${nc}</span>`:''}</div>
+    </div>`}).join('');
+}
+function filterCards(){renderGrid()}
+function setFilter(f,el){activeFilter=f;document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderGrid()}
 
-  const grid = document.getElementById('articleGrid');
-  const empty = document.getElementById('emptyState');
+async function showArticle(id){
+  currentId=id;location.hash=id;
+  const a=getAll().find(x=>x.id===id);if(!a)return;
+  let md='';
+  if(a._local&&a._content)md=a._content;
+  else if(!a._local){try{const r=await fetch(`posts/${a.file}`);md=await r.text()}catch{md='*Could not load.*'}}
 
-  if (filtered.length === 0) {
-    grid.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
+  document.getElementById('indexView').classList.add('hidden');
+  document.getElementById('articleView').classList.add('active');
+  const badge=document.getElementById('heroBadge');badge.textContent=a.source;badge.className=`badge ${a.source}`;
+  document.getElementById('heroMeta').textContent=`${a.category} · ${fmtDate(a.date)}`;
+  document.getElementById('heroTitle').textContent=a.title;
+  document.getElementById('heroSub').textContent=a.subtitle||'';
+  document.getElementById('proseBody').innerHTML=marked.parse(md);
+  document.getElementById('deleteBtn').style.display=a._local?'':'none';
 
-  grid.innerHTML = filtered.map((a, i) => {
-    const noteCount = getNotes(a.id).length;
-    const dateStr = formatDate(a.date);
-    return `
-    <div class="article-card fade-in" onclick="showArticle('${a.id}')" style="animation-delay:${i*0.05}s">
-      <div class="card-header">
-        <span class="card-meta">${a.category} · ${dateStr}</span>
-        <span class="source-badge ${a.source}">${a.source}</span>
-      </div>
-      <div class="card-title">${a.title}</div>
-      <div class="card-excerpt">${a.subtitle || ''}</div>
-      <div class="card-footer">
-        <div class="card-tags">${a.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-        ${noteCount ? `<span class="note-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${noteCount}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+  const h2s=document.querySelectorAll('.prose h2'),tw=document.getElementById('tocWrap');
+  if(h2s.length>1){let h='<h4>Contents</h4><ul class="toc-list">';h2s.forEach((el,i)=>{el.id='s'+i;h+=`<li><a href="#s${i}">${el.textContent}</a></li>`});h+='</ul>';tw.innerHTML=h}else tw.innerHTML='';
+
+  const wc=md.replace(/[#*_\[\]|`>-]/g,'').split(/\s+/).length;
+  document.getElementById('readInfo').innerHTML=`${Math.ceil(wc/220)} min read<br>${wc} words`;
+  document.getElementById('sbTags').innerHTML=a.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('');
+  document.getElementById('notesPanel').classList.remove('open');
+  updateNotesLabel();renderNotes();window.scrollTo(0,0);
 }
 
-function filterArticles() { renderIndex(); }
-
-function setFilter(f) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  renderIndex();
-}
-
-function formatDate(d) {
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-// ═══════════════════════════════════════════════════════
-//  ARTICLE VIEW
-// ═══════════════════════════════════════════════════════
-async function showArticle(id) {
-  const a = articles.find(x => x.id === id);
-  if (!a) return;
-  currentArticleId = id;
-  window.location.hash = id;
-
-  // Load the markdown file
-  try {
-    const res = await fetch(`posts/${a.file}`);
-    const md = await res.text();
-    const html = marked.parse(md);
-
-    document.getElementById('indexView').classList.add('hidden');
-    document.getElementById('articleView').classList.add('active');
-
-    // Hero
-    const badge = document.getElementById('heroBadge');
-    badge.textContent = a.source;
-    badge.className = `source-badge ${a.source}`;
-    document.getElementById('heroMeta').textContent = `${a.category} · ${formatDate(a.date)}`;
-    document.getElementById('heroTitle').textContent = a.title;
-    document.getElementById('heroSubtitle').textContent = a.subtitle || '';
-
-    // Body
-    document.getElementById('articleBody').innerHTML = html;
-
-    // TOC — auto-generate from h2s
-    const h2s = document.querySelectorAll('.prose h2');
-    const tocSection = document.getElementById('tocSection');
-    if (h2s.length > 1) {
-      let tocHTML = '<h4>Contents</h4><ul class="toc-list">';
-      h2s.forEach((h, i) => {
-        h.id = 'section-' + i;
-        tocHTML += `<li><a href="#section-${i}">${h.textContent}</a></li>`;
-      });
-      tocHTML += '</ul>';
-      tocSection.innerHTML = tocHTML;
-    } else {
-      tocSection.innerHTML = '';
-    }
-
-    // Sidebar meta
-    const wordCount = md.replace(/[#*_\[\]|`>-]/g, '').split(/\s+/).length;
-    const mins = Math.ceil(wordCount / 220);
-    document.getElementById('readingMeta').innerHTML =
-      `${mins} min read<br>${wordCount} words<br>Source: ${a.source}`;
-
-    // Tags
-    document.getElementById('sidebarTags').innerHTML =
-      a.tags.map(t => `<span class="tag">${t}</span>`).join('');
-
-    // Notes
-    renderNotes();
-    document.getElementById('notesPanel').classList.remove('open');
-    updateNotesLabel();
-
-    window.scrollTo(0, 0);
-  } catch (e) {
-    console.error('Failed to load article:', e);
-    document.getElementById('articleBody').innerHTML =
-      `<p>Could not load <code>posts/${a.file}</code>. Make sure the file exists.</p>`;
-  }
-}
-
-function showIndex() {
+function showIndex(){
   document.getElementById('indexView').classList.remove('hidden');
   document.getElementById('articleView').classList.remove('active');
-  document.getElementById('progressBar').style.width = '0%';
-  window.location.hash = '';
-  currentArticleId = null;
-  renderIndex(); // refresh note counts
-  window.scrollTo(0, 0);
+  document.getElementById('progressBar').style.width='0%';
+  location.hash='';currentId=null;renderGrid();window.scrollTo(0,0);
 }
 
-// Progress bar
-window.addEventListener('scroll', () => {
-  if (!document.getElementById('articleView').classList.contains('active')) return;
-  const h = document.documentElement.scrollHeight - window.innerHeight;
-  document.getElementById('progressBar').style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+window.addEventListener('scroll',()=>{
+  if(!document.getElementById('articleView').classList.contains('active'))return;
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('progressBar').style.width=(h>0?(scrollY/h)*100:0)+'%';
 });
 
-// ═══════════════════════════════════════════════════════
-//  NOTES SYSTEM (localStorage)
-// ═══════════════════════════════════════════════════════
-function getNotesKey(id) { return `fieldnotes:${id || currentArticleId}`; }
-
-function getNotes(id) {
-  try {
-    return JSON.parse(localStorage.getItem(getNotesKey(id)) || '[]');
-  } catch { return []; }
+// NOTES
+function toggleNotes(){document.getElementById('notesPanel').classList.toggle('open')}
+function updateNotesLabel(){const n=getNotes().length;document.getElementById('notesLabel').textContent=n?`Notes (${n})`:'Notes'}
+function addNote(text){
+  const input=document.getElementById('noteInput');const t=text||input.value.trim();if(!t)return;
+  const notes=getNotes();notes.unshift({text:t,time:new Date().toISOString(),highlight:!!text});
+  setNotes(notes);if(!text)input.value='';renderNotes();updateNotesLabel();flashSave();
 }
-
-function saveNotes(notes) {
-  localStorage.setItem(getNotesKey(), JSON.stringify(notes));
-}
-
-function addNote() {
-  const input = document.getElementById('noteInput');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const notes = getNotes();
-  notes.unshift({
-    text,
-    time: new Date().toISOString()
-  });
-  saveNotes(notes);
-  input.value = '';
-  renderNotes();
-  showSaveIndicator();
-  updateNotesLabel();
-}
-
-function deleteNote(index) {
-  const notes = getNotes();
-  notes.splice(index, 1);
-  saveNotes(notes);
-  renderNotes();
-  updateNotesLabel();
-}
-
-function renderNotes() {
-  const notes = getNotes();
-  const container = document.getElementById('savedNotes');
-  if (notes.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-  container.innerHTML = notes.map((n, i) => {
-    const dt = new Date(n.time);
-    const timeStr = dt.toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-    });
-    return `
-    <div class="saved-note">
-      <button class="delete-note" onclick="deleteNote(${i})" title="Delete note">&times;</button>
-      <p>${escapeHTML(n.text)}</p>
-      <div class="note-time">${timeStr}</div>
-    </div>`;
+function deleteNote(i){const n=getNotes();n.splice(i,1);setNotes(n);renderNotes();updateNotesLabel()}
+function renderNotes(){
+  const notes=getNotes();
+  document.getElementById('notesList').innerHTML=notes.map((n,i)=>{
+    const ts=new Date(n.time).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    return`<div class="note-item${n.highlight?' hl':''}"><button class="note-del" onclick="deleteNote(${i})">&times;</button>${n.highlight?'<div class="hl-label">Highlight</div>':''}<p>${esc(n.text)}</p><div class="note-time">${ts}</div></div>`
   }).join('');
 }
+function flashSave(){const el=document.getElementById('savedFlash');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
 
-function toggleNotes() {
-  document.getElementById('notesPanel').classList.toggle('open');
+// TEXT SELECTION
+let selText='';
+document.addEventListener('mouseup',e=>{
+  const popup=document.getElementById('selPopup'),sel=window.getSelection(),text=sel.toString().trim();
+  if(text.length>3&&document.getElementById('articleView').classList.contains('active')&&e.target.closest('.prose')){
+    selText=text;const rect=sel.getRangeAt(0).getBoundingClientRect();
+    popup.style.left=(rect.left+rect.width/2-50)+'px';popup.style.top=(rect.top-40+window.scrollY)+'px';popup.style.display='block';
+  }else popup.style.display='none';
+});
+function saveHighlight(){
+  if(selText){addNote(selText);document.getElementById('selPopup').style.display='none';
+  document.getElementById('notesPanel').classList.add('open');window.getSelection().removeAllRanges();selText=''}
 }
 
-function updateNotesLabel() {
-  const count = getNotes().length;
-  document.getElementById('notesToggleLabel').textContent =
-    count ? `Notes (${count})` : 'Notes';
+// COMPOSER
+function openComposer(){document.getElementById('composerModal').classList.add('open')}
+function closeComposer(){document.getElementById('composerModal').classList.remove('open');resetComposer()}
+function resetComposer(){
+  ['pasteArea','cTitle','cSubtitle','cTags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cCategory').value='Research';
+  document.getElementById('dropZone').classList.remove('has-content');
+  document.getElementById('dropPreview').innerHTML='';
+  document.getElementById('saveArticleBtn').disabled=true;composerContent='';
 }
 
-function showSaveIndicator() {
-  const el = document.getElementById('saveIndicator');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1500);
-}
-
-function escapeHTML(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-// Handle Enter in note input
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.metaKey && document.activeElement.id === 'noteInput') {
-    addNote();
-  }
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('dragover');
+  const text=e.dataTransfer.getData('text/plain')||e.dataTransfer.getData('text');
+  if(text){document.getElementById('pasteArea').value=text;handlePaste()}
+  if(e.dataTransfer.files.length){const f=e.dataTransfer.files[0];const r=new FileReader();
+    r.onload=ev=>{document.getElementById('pasteArea').value=ev.target.result;handlePaste()};r.readAsText(f)}
 });
 
-// ═══════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════
+function handlePaste(){
+  const raw=document.getElementById('pasteArea').value.trim();
+  if(!raw){dz.classList.remove('has-content');document.getElementById('saveArticleBtn').disabled=true;return}
+  composerContent=raw;dz.classList.add('has-content');document.getElementById('saveArticleBtn').disabled=false;
+  const preview=document.getElementById('dropPreview');
+  const lines=raw.split('\n').slice(0,12).join('\n');
+  preview.textContent=lines+(raw.split('\n').length>12?'\n...':'');
+  const tm=raw.match(/^#\s+(.+)/m);
+  if(tm&&!document.getElementById('cTitle').value)document.getElementById('cTitle').value=tm[1].trim();
+  if(!document.getElementById('cTags').value){
+    const h2s=[...raw.matchAll(/^##\s+(.+)/gm)].map(m=>m[1].trim()).slice(0,3);
+    if(h2s.length){const kw=h2s.join(' ').split(/\s+/).filter(w=>w.length>3&&!['the','and','for','with','from','that','this'].includes(w.toLowerCase())).slice(0,3);
+    if(kw.length)document.getElementById('cTags').value=kw.join(', ')}
+  }
+}
+function pickSource(s,el){composerSource=s;document.querySelectorAll('.source-opt').forEach(e=>e.classList.remove('on'));el.classList.add('on')}
+
+function saveArticle(){
+  const title=document.getElementById('cTitle').value.trim();if(!title||!composerContent)return;
+  const id=title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const article={id,title,subtitle:document.getElementById('cSubtitle').value.trim(),
+    date:new Date().toISOString().split('T')[0],source:composerSource,
+    category:document.getElementById('cCategory').value.trim()||'Research',
+    tags:document.getElementById('cTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    _content:composerContent};
+  const local=getLocal();const idx=local.findIndex(a=>a.id===id);
+  if(idx>=0)local[idx]=article;else local.unshift(article);
+  saveLocal(local);closeComposer();renderGrid();setTimeout(()=>showArticle(id),200);
+}
+function previewArticle(){
+  if(!composerContent)return;
+  const title=document.getElementById('cTitle').value.trim()||'Untitled';
+  currentId='_preview';
+  document.getElementById('indexView').classList.add('hidden');
+  document.getElementById('articleView').classList.add('active');
+  const badge=document.getElementById('heroBadge');badge.textContent=composerSource;badge.className=`badge ${composerSource}`;
+  document.getElementById('heroMeta').textContent='Preview';
+  document.getElementById('heroTitle').textContent=title;
+  document.getElementById('heroSub').textContent=document.getElementById('cSubtitle').value||'';
+  document.getElementById('proseBody').innerHTML=marked.parse(composerContent);
+  document.getElementById('deleteBtn').style.display='none';
+  closeComposer();window.scrollTo(0,0);
+}
+
+function deleteArticle(){
+  if(!currentId||!confirm('Delete this article from local storage?'))return;
+  saveLocal(getLocal().filter(a=>a.id!==currentId));localStorage.removeItem(LS_N+currentId);showIndex();
+}
+
+function exportArticle(){
+  if(!currentId)return;const a=getAll().find(x=>x.id===currentId);if(!a)return;
+  const fn=a.id+'.md',content=a._content||'(git-backed — already in posts/)';
+  const json=JSON.stringify({id:a.id,file:fn,title:a.title,subtitle:a.subtitle||'',date:a.date,source:a.source,category:a.category,tags:a.tags},null,2);
+  document.getElementById('exportFilename').textContent=fn;
+  document.getElementById('exportMd').textContent=content;
+  document.getElementById('exportJson').textContent=json;
+  document.getElementById('exportModal').classList.add('open');
+}
+function copyExport(id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    event.target.textContent='Copied!';setTimeout(()=>event.target.textContent=id==='exportMd'?'Copy Markdown':'Copy JSON',1500)});
+}
+
+// DARK MODE
+function toggleTheme(){
+  const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',n);localStorage.setItem(LS_T,n);updateThemeIcon();
+}
+function applyTheme(){const t=localStorage.getItem(LS_T)||'light';document.documentElement.setAttribute('data-theme',t);updateThemeIcon()}
+function updateThemeIcon(){
+  const d=document.documentElement.getAttribute('data-theme')==='dark';
+  document.getElementById('themeBtn').innerHTML=d?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/></svg>';
+}
+
+// KEYBOARD
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(document.getElementById('composerModal').classList.contains('open'))closeComposer();
+    else if(document.getElementById('exportModal').classList.contains('open'))document.getElementById('exportModal').classList.remove('open');
+    else if(document.getElementById('articleView').classList.contains('active'))showIndex()}
+  if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&document.activeElement.id==='noteInput')addNote();
+  if(e.key==='n'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&document.getElementById('articleView').classList.contains('active'))toggleNotes();
+});
+
+function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
 init();
 </script>
 </body>
