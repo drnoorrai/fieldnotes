@@ -484,9 +484,12 @@ async function deleteNote(noteId){
     const noteTime=strId.slice(3);
     setLSNotes(getLSNotes(currentId).filter(n=>n.time!==noteTime),currentId);
   }else{
+    let deleted=false;
     try{
-      await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
+      const r=await fetch('/api/notes/'+encodeURIComponent(currentId)+'/'+noteId,{method:'DELETE'});
+      deleted=(r.ok||r.status===404);
     }catch{}
+    if(!deleted)return;
   }
   notesCache=notesCache.filter(n=>String(n.id)!==strId);
   notesCounts[currentId]=Math.max(0,(notesCounts[currentId]||1)-1);
